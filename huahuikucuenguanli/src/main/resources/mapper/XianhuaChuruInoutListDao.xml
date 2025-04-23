@@ -1,0 +1,162 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.dao.XianhuaChuruInoutListDao">
+
+    <!-- 通用查询结果列 -->
+    <sql id="Base_Column_List">
+        a.id as id
+        ,a.xianhua_churu_inout_id as xianhuaChuruInoutId
+        ,a.xianhua_id as xianhuaId
+        ,a.xianhua_churu_inout_list_number as xianhuaChuruInoutListNumber
+        ,a.insert_time as insertTime
+        ,a.create_time as createTime
+    </sql>
+    <select id="selectListView" parameterType="map" resultType="com.entity.view.XianhuaChuruInoutListView" >
+        SELECT
+        <include refid="Base_Column_List" />
+
+--         级联表的字段
+        ,xianhua.xianhua_uuid_number as xianhuaUuidNumber
+        ,xianhua.xianhua_name as xianhuaName
+        ,xianhua.xianhua_photo as xianhuaPhoto
+        ,xianhua.gongyingshang_name as gongyingshangName
+        ,xianhua.gongyingshang_phone as gongyingshangPhone
+        ,xianhua.xianhua_types as xianhuaTypes
+        ,xianhua.xianhua_kucun_number as xianhuaKucunNumber
+        ,xianhua.xianhua_xiaoshou_money as xianhuaXiaoshouMoney
+        ,xianhua.shangxia_types as shangxiaTypes
+        ,xianhua.xianhua_delete as xianhuaDelete
+        ,xianhua.xianhua_text as xianhuaText
+        ,xianhua.xianhua_content as xianhuaContent
+        ,xianhuaChuruInout.xianhua_churu_inout_uuid_number as xianhuaChuruInoutUuidNumber
+        ,xianhuaChuruInout.yonghu_id as xianhuaChuruInoutYonghuId
+        ,xianhuaChuruInout.xianhua_churu_inout_name as xianhuaChuruInoutName
+        ,xianhuaChuruInout.xianhua_churu_inout_types as xianhuaChuruInoutTypes
+        ,xianhuaChuruInout.xianhua_churu_inout_content as xianhuaChuruInoutContent
+
+        FROM xianhua_churu_inout_list  a
+        left JOIN xianhua xianhua ON a.xianhua_id = xianhua.id
+        left JOIN xianhua_churu_inout xianhuaChuruInout ON a.xianhua_churu_inout_id = xianhuaChuruInout.id
+
+        <where>
+            <if test="params.ids != null">
+                and a.id in
+                <foreach item="item" index="index" collection="params.ids" open="(" separator="," close=")">
+                #{item}
+                </foreach>
+            </if>
+            <if test="params.xianhuaChuruInoutId != null and params.xianhuaChuruInoutId != ''">
+                and (
+                    a.xianhua_churu_inout_id = #{params.xianhuaChuruInoutId}
+                )
+            </if>
+            <if test="params.xianhuaId != null and params.xianhuaId != ''">
+                and (
+                    a.xianhua_id = #{params.xianhuaId}
+                )
+            </if>
+            <if test="params.xianhuaChuruInoutListNumberStart != null and params.xianhuaChuruInoutListNumberStart != ''">
+                <![CDATA[  and a.xianhua_churu_inout_list_number >= #{params.xianhuaChuruInoutListNumberStart}   ]]>
+            </if>
+            <if test="params.xianhuaChuruInoutListNumberEnd != null and params.xianhuaChuruInoutListNumberEnd != ''">
+                <![CDATA[  and a.xianhua_churu_inout_list_number <= #{params.xianhuaChuruInoutListNumberEnd}   ]]>
+            </if>
+             <if test="params.xianhuaChuruInoutListNumber != null and params.xianhuaChuruInoutListNumber != ''">
+                and a.xianhua_churu_inout_list_number = #{params.xianhuaChuruInoutListNumber}
+             </if>
+            <if test=" params.insertTimeStart != '' and params.insertTimeStart != null ">
+                <![CDATA[  and UNIX_TIMESTAMP(a.insert_time) >= UNIX_TIMESTAMP(#{params.insertTimeStart}) ]]>
+            </if>
+            <if test=" params.insertTimeEnd != '' and params.insertTimeEnd != null ">
+                <![CDATA[  and UNIX_TIMESTAMP(a.insert_time) <= UNIX_TIMESTAMP(#{params.insertTimeEnd}) ]]>
+            </if>
+
+                <!-- 判断货物的id不为空 -->
+            <if test=" params.xianhuaIdNotNull != '' and params.xianhuaIdNotNull != null and params.xianhuaIdNotNull != 'null' ">
+                and a.xianhua_id IS NOT NULL
+            </if>
+            <if test=" params.xianhuaUuidNumber != '' and params.xianhuaUuidNumber != null and params.xianhuaUuidNumber != 'null' ">
+                and xianhua.xianhua_uuid_number like CONCAT('%',#{params.xianhuaUuidNumber},'%')
+            </if>
+            <if test=" params.xianhuaName != '' and params.xianhuaName != null and params.xianhuaName != 'null' ">
+                and xianhua.xianhua_name like CONCAT('%',#{params.xianhuaName},'%')
+            </if>
+            <if test=" params.gongyingshangName != '' and params.gongyingshangName != null and params.gongyingshangName != 'null' ">
+                and xianhua.gongyingshang_name like CONCAT('%',#{params.gongyingshangName},'%')
+            </if>
+            <if test=" params.gongyingshangPhone != '' and params.gongyingshangPhone != null and params.gongyingshangPhone != 'null' ">
+                and xianhua.gongyingshang_phone like CONCAT('%',#{params.gongyingshangPhone},'%')
+            </if>
+            <if test="params.cangkuId != null  and params.cangkuId != ''">
+                and xianhua.cangku_id = #{params.cangkuId}
+            </if>
+            <if test="params.xianhuaTypes != null  and params.xianhuaTypes != ''">
+                and xianhua.xianhua_types = #{params.xianhuaTypes}
+            </if>
+
+            <if test="params.xianhuaKucunNumberStart != null  and params.xianhuaKucunNumberStart != '' ">
+                <![CDATA[  and xianhua.xianhua_kucun_number >= #{params.xianhuaKucunNumberStart}   ]]>
+            </if>
+            <if test="params.xianhuaKucunNumberEnd != null  and params.xianhuaKucunNumberEnd != '' ">
+                <![CDATA[  and xianhua.xianhua_kucun_number <= #{params.xianhuaKucunNumberEnd}   ]]>
+            </if>
+            <if test="params.xianhuaKucunNumber != null  and params.xianhuaKucunNumber != '' ">
+                and xianhua.xianhua_kucun_number = #{params.xianhuaKucunNumber}
+            </if>
+            <if test="params.xianhuaXiaoshouMoneyStart != null ">
+                <![CDATA[  and xianhua.xianhua_xiaoshou_money >= #{params.xianhuaXiaoshouMoneyStart}   ]]>
+            </if>
+            <if test="params.xianhuaXiaoshouMoneyEnd != null ">
+                <![CDATA[  and xianhua.xianhua_xiaoshou_money <= #{params.xianhuaXiaoshouMoneyEnd}   ]]>
+            </if>
+            <if test="params.shangxiaTypes != null  and params.shangxiaTypes != ''">
+                and xianhua.shangxia_types = #{params.shangxiaTypes}
+            </if>
+
+            <if test="params.xianhuaDeleteStart != null  and params.xianhuaDeleteStart != '' ">
+                <![CDATA[  and xianhua.xianhua_delete >= #{params.xianhuaDeleteStart}   ]]>
+            </if>
+            <if test="params.xianhuaDeleteEnd != null  and params.xianhuaDeleteEnd != '' ">
+                <![CDATA[  and xianhua.xianhua_delete <= #{params.xianhuaDeleteEnd}   ]]>
+            </if>
+            <if test="params.xianhuaDelete != null  and params.xianhuaDelete != '' ">
+                and xianhua.xianhua_delete = #{params.xianhuaDelete}
+            </if>
+            <if test=" params.xianhuaText != '' and params.xianhuaText != null and params.xianhuaText != 'null' ">
+                and xianhua.xianhua_text like CONCAT('%',#{params.xianhuaText},'%')
+            </if>
+            <if test=" params.xianhuaContent != '' and params.xianhuaContent != null and params.xianhuaContent != 'null' ">
+                and xianhua.xianhua_content like CONCAT('%',#{params.xianhuaContent},'%')
+            </if>
+                <!-- 判断出入库的id不为空 -->
+            <if test=" params.xianhuaChuruInoutIdNotNull != '' and params.xianhuaChuruInoutIdNotNull != null and params.xianhuaChuruInoutIdNotNull != 'null' ">
+                and a.xianhua_churu_inout_id IS NOT NULL
+            </if>
+            <if test=" params.xianhuaChuruInoutUuidNumber != '' and params.xianhuaChuruInoutUuidNumber != null and params.xianhuaChuruInoutUuidNumber != 'null' ">
+                and xianhuaChuruInout.xianhua_churu_inout_uuid_number like CONCAT('%',#{params.xianhuaChuruInoutUuidNumber},'%')
+            </if>
+            <if test="params.yonghuId != null  and params.yonghuId != ''">
+                and xianhuaChuruInout.yonghu_id = #{params.yonghuId}
+            </if>
+            <if test=" params.xianhuaChuruInoutName != '' and params.xianhuaChuruInoutName != null and params.xianhuaChuruInoutName != 'null' ">
+                and xianhuaChuruInout.xianhua_churu_inout_name like CONCAT('%',#{params.xianhuaChuruInoutName},'%')
+            </if>
+            <if test="params.xianhuaChuruInoutTypes != null  and params.xianhuaChuruInoutTypes != ''">
+                and xianhuaChuruInout.xianhua_churu_inout_types = #{params.xianhuaChuruInoutTypes}
+            </if>
+
+            <if test=" params.xianhuaChuruInoutContent != '' and params.xianhuaChuruInoutContent != null and params.xianhuaChuruInoutContent != 'null' ">
+                and xianhuaChuruInout.xianhua_churu_inout_content like CONCAT('%',#{params.xianhuaChuruInoutContent},'%')
+            </if>
+            <if test=" params.insertTimeStart != '' and params.insertTimeStart != null ">
+                <![CDATA[  and UNIX_TIMESTAMP(xianhuaChuruInout.insert_time) >= UNIX_TIMESTAMP(#{params.insertTimeStart}) ]]>
+            </if>
+            <if test=" params.insertTimeEnd != '' and params.insertTimeEnd != null ">
+                <![CDATA[  and UNIX_TIMESTAMP(xianhuaChuruInout.insert_time) <= UNIX_TIMESTAMP(#{params.insertTimeEnd}) ]]>
+            </if>
+        </where>
+
+        order by a.${params.orderBy} desc 
+    </select>
+
+</mapper>
